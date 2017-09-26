@@ -1,6 +1,6 @@
 ---
 title: "STAT/MATH 495: Problem Set 04"
-author: "WRITE YOUR NAME HERE"
+author: "Harrison Marick"
 date: "2017-10-03"
 output:
   html_document:
@@ -66,6 +66,59 @@ RMSE_test <- runif(n=7)
 # Do your work here:
 
 
+rmse <- function(actual, predicted) #create function to calculate RMSE
+{
+    error=actual-predicted
+    sqrt(mean(error^2))
+}
+
+m1<-lm(model1_formula, data=credit_train) #learn with 1 predictor
+m2<-lm(model2_formula, data=credit_train) #learn with 2
+m3<-lm(model3_formula, data=credit_train) #learn with 3
+m4<-lm(model4_formula, data=credit_train) #learn with 4
+m5<-lm(model5_formula, data=credit_train) #learn with 5
+m6<-lm(model6_formula, data=credit_train) #learn with 6
+m7<-lm(model7_formula, data=credit_train) #learn with 7
+
+credit_train <- credit_train %>% #create predictions for the training set
+  mutate(pred1=predict(m1, credit_train), 
+         pred2=predict(m2, credit_train),
+         pred3=predict(m3, credit_train),
+         pred4=predict(m4, credit_train),
+         pred5=predict(m5, credit_train),
+         pred6=predict(m6, credit_train),
+         pred7=predict(m7, credit_train))
+
+
+credit_test <- credit_test %>% #create predictions for testing set
+  mutate(pred1=predict(m1, credit_test), 
+         pred2=predict(m2, credit_test),
+         pred3=predict(m3, credit_test),
+         pred4=predict(m4, credit_test),
+         pred5=predict(m5, credit_test),
+         pred6=predict(m6, credit_test),
+         pred7=predict(m7, credit_test))
+
+
+#below creates list of RMSE for training data
+RMSE_train=c(rmse(credit_train$Balance, credit_train$pred1),
+             rmse(credit_train$Balance, credit_train$pred2),
+             rmse(credit_train$Balance, credit_train$pred3),
+             rmse(credit_train$Balance, credit_train$pred4),
+             rmse(credit_train$Balance, credit_train$pred5),
+             rmse(credit_train$Balance, credit_train$pred6),
+             rmse(credit_train$Balance, credit_train$pred7))
+
+#below creates list of RMSE for testing data
+RMSE_test=c(rmse(credit_test$Balance, credit_test$pred1),
+             rmse(credit_test$Balance, credit_test$pred2),
+             rmse(credit_test$Balance, credit_test$pred3),
+             rmse(credit_test$Balance, credit_test$pred4),
+             rmse(credit_test$Balance, credit_test$pred5),
+             rmse(credit_test$Balance, credit_test$pred6),
+             rmse(credit_test$Balance, credit_test$pred7))
+
+
 # Save results in a data frame. Note this data frame is in wide format.
 results <- data_frame(
   num_coefficients = 1:7,
@@ -94,7 +147,9 @@ ggplot(results, aes(x=num_coefficients, y=RMSE, col=type)) +
 
 Compare and contrast the two curves and hypothesize as to the root cause of any differences.
 
+No matter how many coefficients we have, the RSME is lower with the training data than with the test data. This makes sense since the each model was created to fit the training data, not the sample data. Therefore, our models have been fit to the specific intricacies of our training data. In particular, our training data only has a sample size of 20, which means that we have very little information with which to learn. We do not really have a sufficient sample size with our training data to learn anything but noise. It makes sense that the models perform better on a training set this small. 
 
+Additionally, notice how the performance on the training data decreases as we increase predictors; the same can be said for the test data until we reach 5 coefficients, at which point the RSME increases. This is evidence of overfitting. By adding coefficients to the training data, we learn the training data very well and our performance improves on the training data, but the models perform worse on the test data. Our models have been overfit to a very specific training set.
 
 # Bonus
 
@@ -102,6 +157,88 @@ Repeat the whole process, but let `credit_train` be a random sample of size 380
 from `credit` instead of 20. Now compare and contrast this graph with the
 one above and hypothesize as to the root cause of any differences.
 
-```{r, echo=FALSE}
 
+```{r}
+
+##I HAVE REMOVED CODE COMMENTS SINCE CODE IS NEARLY IDENTICAL TO ABOVE
+set.seed(101)
+credit_train2 <- credit %>% 
+  sample_n(380)
+credit_test2 <- credit %>% 
+  anti_join(credit_train2, by="ID")
+
+
+# Placeholder vectors of length 7. For now, I've filled them with arbitrary 
+# values; you will fill these in
+RMSE_train2 <- runif(n=7)
+RMSE_test2 <- runif(n=7)
+
+
+
+m1b<-lm(model1_formula, data=credit_train2)
+m2b<-lm(model2_formula, data=credit_train2)
+m3b<-lm(model3_formula, data=credit_train2)
+m4b<-lm(model4_formula, data=credit_train2)
+m5b<-lm(model5_formula, data=credit_train2)
+m6b<-lm(model6_formula, data=credit_train2)
+m7b<-lm(model7_formula, data=credit_train2)
+
+credit_train2 <- credit_train2 %>%
+  mutate(pred1=predict(m1b, credit_train2), 
+         pred2=predict(m2b, credit_train2),
+         pred3=predict(m3b, credit_train2),
+         pred4=predict(m4b, credit_train2),
+         pred5=predict(m5b, credit_train2),
+         pred6=predict(m6b, credit_train2),
+         pred7=predict(m7b, credit_train2))
+
+
+credit_test2 <- credit_test2 %>%
+  mutate(pred1=predict(m1b, credit_test2), 
+         pred2=predict(m2b, credit_test2),
+         pred3=predict(m3b, credit_test2),
+         pred4=predict(m4b, credit_test2),
+         pred5=predict(m5b, credit_test2),
+         pred6=predict(m6b, credit_test2),
+         pred7=predict(m7b, credit_test2))
+
+RMSE_train2=c(rmse(credit_train2$Balance, credit_train2$pred1),
+             rmse(credit_train2$Balance, credit_train2$pred2),
+             rmse(credit_train2$Balance, credit_train2$pred3),
+             rmse(credit_train2$Balance, credit_train2$pred4),
+             rmse(credit_train2$Balance, credit_train2$pred5),
+             rmse(credit_train2$Balance, credit_train2$pred6),
+             rmse(credit_train2$Balance, credit_train2$pred7))
+
+RMSE_test2=c(rmse(credit_test2$Balance, credit_test2$pred1),
+             rmse(credit_test2$Balance, credit_test2$pred2),
+             rmse(credit_test2$Balance, credit_test2$pred3),
+             rmse(credit_test2$Balance, credit_test2$pred4),
+             rmse(credit_test2$Balance, credit_test2$pred5),
+             rmse(credit_test2$Balance, credit_test2$pred6),
+             rmse(credit_test2$Balance, credit_test2$pred7))
+
+
+# Save results in a data frame. Note this data frame is in wide format.
+results2 <- data_frame(
+  num_coefficients = 1:7,
+  RMSE_train2,
+  RMSE_test2
+) 
+
+# Some cleaning of results
+results2 <- results2 %>% 
+  # More intuitive names:
+  rename(
+    `Training data` = RMSE_train2,
+    `Test data` = RMSE_test2
+  ) %>% 
+  # Convert results data frame to "tidy" data format i.e. long format, so that we
+  # can ggplot it
+  gather(type, RMSE, -num_coefficients)
+
+ggplot(results2, aes(x=num_coefficients, y=RMSE, col=type)) +
+  geom_line() + 
+  labs(x="# of coefficients", y="RMSE", col="Data used to evaluate \nperformance of fitted model")
 ```
+Interestingly, the test data performs better than the training data in this instance, no matter how many coefficients we have in the model. With 380 of the 400 values available for training, our models spend a lot of time learning and improving the predictability. While I expected the gap between our training and testing performance to improve compared to our experiment when training with just 20 rows, I did not expect the RSME of the test data to actually be lower than the training data for each model. The gap in RSME between the two is very small, which makes me think that this is simply a unique case, given the RSME of the training data should be lower in most instances. I expected the RSME's to be rather close, however, since with a larger training set, our likelihood of overfitting should be lower. With a larger training set, I expected our out of sample performance to improve significantly, particularly with more predictors. 
