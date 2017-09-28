@@ -159,15 +159,15 @@ one above and hypothesize as to the root cause of any differences.
 
 
 ```{r}
-
-##I HAVE REMOVED CODE COMMENTS SINCE CODE IS NEARLY IDENTICAL TO ABOVE
 set.seed(101)
 credit_train2 <- credit %>% 
-  sample_n(380)
+  sample_n(380) #change size of train/test set split
 credit_test2 <- credit %>% 
   anti_join(credit_train2, by="ID")
+```
 
 
+```{r, echo=FALSE}
 # Placeholder vectors of length 7. For now, I've filled them with arbitrary 
 # values; you will fill these in
 RMSE_train2 <- runif(n=7)
